@@ -13,11 +13,11 @@ class unetUp(nn.Module):
         self.up     = nn.UpsamplingBilinear2d(scale_factor = 2)
         self.relu   = nn.ReLU(inplace = True)
 
-    def forward(self, inputs1, inputs2):
-        outputs = torch.cat([inputs1, self.up(inputs2)], 1)
-        outputs = self.conv1(outputs)
-        outputs = self.relu(outputs)
-        outputs = self.conv2(outputs)
+    def forward(self, inputs1, inputs2):  # 两个输入特征层
+        outputs = torch.cat([inputs1, self.up(inputs2)], 1)  # 对inputs2进行上采样，和inputs1组合
+        outputs = self.conv1(outputs)  # 2次卷积
+        outputs = self.relu(outputs)   
+        outputs = self.conv2(outputs)  # 2次卷积
         outputs = self.relu(outputs)
         return outputs
 
@@ -32,7 +32,7 @@ class Unet(nn.Module):
             in_filters  = [192, 512, 1024, 3072]
         else:
             raise ValueError('Unsupported backbone - `{}`, Use vgg, resnet50.'.format(backbone))
-        out_filters = [64, 128, 256, 512]
+        out_filters = [64, 128, 256, 512]  # 完成堆叠后的通道数
 
         # upsampling
         # 64,64,512
@@ -42,7 +42,7 @@ class Unet(nn.Module):
         # 256,256,128
         self.up_concat2 = unetUp(in_filters[1], out_filters[1])
         # 512,512,64
-        self.up_concat1 = unetUp(in_filters[0], out_filters[0])
+        self.up_concat1 = unetUp(in_filters[0], out_filters[0])  # 最终有效特征层
 
         if backbone == 'resnet50':
             self.up_conv = nn.Sequential(
@@ -55,7 +55,7 @@ class Unet(nn.Module):
         else:
             self.up_conv = None
 
-        self.final = nn.Conv2d(out_filters[0], num_classes, 1)
+        self.final = nn.Conv2d(out_filters[0], num_classes, 1)  # 通道数调整，即对每个像素点进行分类
 
         self.backbone = backbone
 

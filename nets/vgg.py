@@ -1,7 +1,7 @@
 import torch.nn as nn
 from torch.hub import load_state_dict_from_url
 
-
+# 主干特征提取网络
 class VGG(nn.Module):
     def __init__(self, features, num_classes=1000):
         super(VGG, self).__init__()
@@ -48,7 +48,7 @@ def make_layers(cfg, batch_norm=False, in_channels = 3):
     layers = []
     for v in cfg:
         if v == 'M':
-            layers += [nn.MaxPool2d(kernel_size=2, stride=2)]
+            layers += [nn.MaxPool2d(kernel_size=2, stride=2)]  # 进行最大池化
         else:
             conv2d = nn.Conv2d(in_channels, v, kernel_size=3, padding=1)
             if batch_norm:
@@ -57,9 +57,11 @@ def make_layers(cfg, batch_norm=False, in_channels = 3):
                 layers += [conv2d, nn.ReLU(inplace=True)]
             in_channels = v
     return nn.Sequential(*layers)
-# 512,512,3 -> 512,512,64 -> 256,256,64 -> 256,256,128 -> 128,128,128 -> 128,128,256 -> 64,64,256
+# 图片的变化：   
+# 512,512,3 -> 512,512,64 -> 256,256,64 -> 256,256,128 -> 128,128,128 -> 128,128,256 -> 64,64,256 ->
 # 64,64,512 -> 32,32,512 -> 32,32,512
 cfgs = {
+    # 数字为通道数，‘M‘表示最大池化
     'D': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M']
 }
 
